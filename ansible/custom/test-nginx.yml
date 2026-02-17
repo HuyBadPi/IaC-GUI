@@ -1,0 +1,45 @@
+---
+- name: Install Nginx on Ubuntu Focal
+  hosts: all
+  become: true
+
+  vars:
+    nginx_port: 80
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Enable nginx service
+      systemd:
+        name: nginx
+        enabled: yes
+
+    - name: Start nginx
+      systemd:
+        name: nginx
+        state: started
+
+    - name: Allow HTTP in UFW
+      ufw:
+        rule: allow
+        port: "{{ nginx_port }}"
+        proto: tcp
+      ignore_errors: yes
+
+    - name: Ensure nginx is running
+      command: systemctl is-active nginx
+      register: nginx_status
+      changed_when: false
+
+    - name: Print nginx status
+      debug:
+        msg: "Nginx status = {{ nginx_status.stdout }}"

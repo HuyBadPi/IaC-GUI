@@ -1,0 +1,32 @@
+---
+- name: Install and configure Nginx on AlmaLinux
+  hosts: all
+  become: yes
+
+  tasks:
+
+    - name: Install nginx
+      dnf:
+        name: nginx
+        state: present
+
+    - name: Enable nginx
+      systemd:
+        name: nginx
+        enabled: yes
+
+    - name: Start nginx
+      systemd:
+        name: nginx
+        state: started
+
+    - name: Open firewall HTTP
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+      ignore_errors: yes
+
+    - name: Reload firewall
+      command: firewall-cmd --reload
+      ignore_errors: yes
